@@ -13,16 +13,23 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [hasLoaded, setHasLoaded] = useState(false);
+  
   const lastScrollY = useRef(0);
+  // 1. THE BLINDFOLD: A new memory box to track if we are clicking a link
+  const isClickScrolling = useRef(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setHasLoaded(true);
-    }, 100);
+    const timer = setTimeout(() => setHasLoaded(true), 100);
 
     const controlNavbar = () => {
       if (typeof window !== "undefined") {
         const currentScrollY = window.scrollY;
+
+        // 2. THE CHECK: If the blindfold is on, update memory but skip the hiding logic!
+        if (isClickScrolling.current) {
+          lastScrollY.current = currentScrollY;
+          return; 
+        }
 
         if (currentScrollY > 50) {
           if (currentScrollY > lastScrollY.current && currentScrollY - lastScrollY.current > 5) {
@@ -33,40 +40,40 @@ export default function Navbar() {
         } else {
           setIsVisible(true);
         }
-
         lastScrollY.current = currentScrollY;
       }
     };
 
     if (typeof window !== "undefined") {
       window.addEventListener("scroll", controlNavbar, { passive: true });
-
       return () => {
         window.removeEventListener("scroll", controlNavbar);
         clearTimeout(timer);
       };
     }
-
-    return () => clearTimeout(timer);
   }, []);
 
   const scrollToSection = (href) => {
-    if (href.startsWith("/")) {
-      return;
-    }
-
+    if (href.startsWith("/")) return;
+    
     const element = document.querySelector(href);
     if (element) {
+      // 3. APPLY BLINDFOLD: Tell the navbar we are auto-scrolling
+      isClickScrolling.current = true;
+      setIsVisible(true); // Force the navbar to stay visible
+
       const rect = element.getBoundingClientRect();
       const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
       const elementAbsoluteTop = rect.top + currentScrollY;
       const navbarHeight = 100;
       const targetPosition = Math.max(0, elementAbsoluteTop - navbarHeight);
 
-      window.scrollTo({
-        top: targetPosition,
-        behavior: "smooth",
-      });
+      window.scrollTo({ top: targetPosition, behavior: "smooth" });
+
+      // 4. REMOVE BLINDFOLD: Wait 1 second for the scroll to finish, then take it off
+      setTimeout(() => {
+        isClickScrolling.current = false;
+      }, 1000);
     }
     setIsOpen(false);
   };
