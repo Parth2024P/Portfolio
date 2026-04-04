@@ -46,7 +46,7 @@ function ProjectsSection() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/projects');
+        const response = await fetch('https://portfolio-mv3a.onrender.com/api/projects');
         const data = await response.json();
         setProjects(data);
       } catch (error) {
@@ -153,7 +153,7 @@ function ContactSection() {
     setStatus('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/contact', {
+      const response = await fetch('https://portfolio-mv3a.onrender.com/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

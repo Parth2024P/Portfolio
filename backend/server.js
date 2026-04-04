@@ -33,6 +33,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
+const SERVER_URL = process.env.RENDER_EXTERNAL_URL || "https://portfolio-mv3a.onrender.com";
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on ${SERVER_URL}`);
 });
