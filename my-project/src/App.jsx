@@ -39,42 +39,59 @@ function HeroSection() {
 }
 
 // --- 2. PROJECTS SECTION ---
+const fallbackProjects = [
+  {
+    id: 1,
+    title: 'Campus Guide Website',
+    description: 'Interactive platform to help students navigate the college campus effectively.',
+    tech: ['React', 'JavaScript', 'CSS'],
+    link: '#'
+  },
+  {
+    id: 2,
+    title: 'FitForm AI',
+    description: 'Real-time video analysis model for tracking and correcting workout form.',
+    tech: ['Python', 'Computer Vision', 'AI'],
+    link: '#'
+  },
+  {
+    id: 3,
+    title: 'Project Three',
+    description: 'Performance-optimized dashboard with real-time data integration.',
+    tech: ['React', 'Node.js', 'API'],
+    link: '#'
+  }
+];
+
 function ProjectsSection() {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState(fallbackProjects);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         const response = await fetch('https://portfolio-mv3a.onrender.com/api/projects');
+
+        if (!response.ok) {
+          throw new Error(`Projects API failed with status ${response.status}`);
+        }
+
         const data = await response.json();
-        setProjects(data);
+
+        const normalizedProjects = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.projects)
+            ? data.projects
+            : null;
+
+        if (normalizedProjects && normalizedProjects.length > 0) {
+          setProjects(normalizedProjects);
+        } else {
+          console.warn('Unexpected projects payload, using fallback projects.', data);
+        }
       } catch (error) {
         console.error('Error fetching projects:', error);
-        // Fallback to local projects if backend fails
-        setProjects([
-          {
-            id: 1,
-            title: 'Campus Guide Website',
-            description: 'Interactive platform to help students navigate the college campus effectively.',
-            tech: ['React', 'JavaScript', 'CSS'],
-            link: '#'
-          },
-          {
-            id: 2,
-            title: 'FitForm AI',
-            description: 'Real-time video analysis model for tracking and correcting workout form.',
-            tech: ['Python', 'Computer Vision', 'AI'],
-            link: '#'
-          },
-          {
-            id: 3,
-            title: 'Project Three',
-            description: 'Performance-optimized dashboard with real-time data integration.',
-            tech: ['React', 'Node.js', 'API'],
-            link: '#'
-          }
-        ]);
+        // Keep the fallback projects already in state.
       } finally {
         setLoading(false);
       }
@@ -86,6 +103,9 @@ function ProjectsSection() {
     <section id="projects" className="relative z-10 flex flex-col items-center justify-center min-h-[100dvh] w-full px-6 py-20 bg-black/40 backdrop-blur-sm border-y border-white/5">
       <div className="w-full max-w-6xl mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold mb-12 text-center text-white">Featured Projects</h2>
+        {loading && (
+          <p className="text-center text-sm text-gray-400 mb-6">Loading latest projects...</p>
+        )}
         
         {/* Grid: 1 col on mobile, 2 on tablet, 3 on desktop */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
